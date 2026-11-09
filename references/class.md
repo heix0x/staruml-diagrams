@@ -42,6 +42,7 @@ relations:
 |---|---|---|
 | `association` | 实线，可带标签 | `label`、`aggregation` |
 | `generalization` | 实线空心三角，子类指父类 | 无 |
+| `dependency` | 虚线箭头，使用方指被使用方 | `label` |
 
 `aggregation`：`1` = 源端空心菱形（聚合），`2` = 目标端空心菱形，`-1` / `-2` = 实心菱形（组合），`0` 或缺省 = 普通关联。
 

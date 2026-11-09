@@ -13,11 +13,12 @@
 关系：
     kind: association    实线，可带 label；aggregation: 1/2 端聚合，-1/-2 组合
     kind: generalization 实线空心三角，从子类指向父类
+    kind: dependency     虚线箭头，从使用方指向被使用方（可带 label）
 """
 from __future__ import annotations
 
 from common import (FONT, LINE_H, assoc_model, auto_sides, box, edge_view,
-                    hidden_comp, nid, tw, uml_name_comp)
+                    hidden_comp, nid, tw, typed_edge, uml_name_comp)
 
 STATUS = "verified"
 
@@ -150,6 +151,13 @@ def build(spec: dict, project_id: str) -> dict:
             rel_nodes.append(mid)
             views.append(edge_view("UMLGeneralizationView", dg_id, mid["_id"],
                                    view_ids[a["id"]], view_ids[b["id"]], pts))
+        elif kind == "dependency":
+            mid = typed_edge("UMLDependency", mg_id, model_ids[a["id"]],
+                             model_ids[b["id"]], r.get("label") or "")
+            rel_nodes.append(mid)
+            views.append(edge_view("UMLDependencyView", dg_id, mid["_id"],
+                                   view_ids[a["id"]], view_ids[b["id"]], pts,
+                                   r.get("label") or "", line_style=2, distance=16))
         else:
             mid = assoc_model(mg_id, model_ids[a["id"]], model_ids[b["id"]],
                               r.get("label") or "", int(r.get("aggregation") or 0))

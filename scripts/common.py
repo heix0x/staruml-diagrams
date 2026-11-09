@@ -143,6 +143,26 @@ def assoc_model(parent_model_id: str, a_id: str, b_id: str, name: str = "",
     return m
 
 
+def assoc_like(mtype: str, parent_model_id: str, a_id: str, b_id: str,
+               name: str = "") -> dict:
+    """造一个「长得像关联」的关系模型（UMLAssociation 及其子类，如 UMLCommunicationPath）。
+
+    这类**不能**用 source/target：UMLAssociation 只认 end1/end2，两个
+    UMLAssociationEnd 各自的 `reference` 才是指向端点的字段。写成 source/target
+    的通信路径会被 StarUML 在加载时直接丢掉——模型树里都看不到，更别说连线。
+    """
+    aid = nid()
+    e1 = {"_type": "UMLAssociationEnd", "_id": nid(), "_parent": {"$ref": aid},
+          "reference": {"$ref": a_id}}
+    e2 = {"_type": "UMLAssociationEnd", "_id": nid(), "_parent": {"$ref": aid},
+          "reference": {"$ref": b_id}}
+    m = {"_type": mtype, "_id": aid, "_parent": {"$ref": parent_model_id},
+         "end1": e1, "end2": e2}
+    if name:
+        m["name"] = name
+    return m
+
+
 def box(a: dict, b: dict, side_a: str = "bottom", side_b: str = "top") -> str:
     """两个视图矩形之间的直线 points（自动选连接边）。"""
     def anchor(v, side):
@@ -160,12 +180,14 @@ def box(a: dict, b: dict, side_a: str = "bottom", side_b: str = "top") -> str:
 
 
 def auto_sides(a: dict, b: dict):
-    """按相对位置猜两侧锚点：上下关系走 bottom/top，左右关系走 right/left。"""
+    """按相对位置猜两侧锚点：横向间距更大就走左右，纵向间距更大就走上下。
+
+    早先只处理「完全同列 / 完全同行」，其余一律按上下——结果两个并排的节点
+    会被连成「底部到顶部」的斜线，看着像连错了。
+    """
     ax, ay = a["left"] + a["width"] / 2, a["top"] + a["height"] / 2
     bx, by = b["left"] + b["width"] / 2, b["top"] + b["height"] / 2
-    if abs(ax - bx) < 1:
-        return ("bottom", "top") if ay < by else ("top", "bottom")
-    if abs(ay - by) < 1:
+    if abs(ax - bx) >= abs(ay - by):
         return ("right", "left") if ax < bx else ("left", "right")
     return ("bottom", "top") if ay < by else ("top", "bottom")
 

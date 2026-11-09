@@ -18,6 +18,7 @@ SCRIPTS = os.path.join(ROOT, "scripts")
 EXAMPLES = os.path.join(ROOT, "examples")
 
 # 描述文件 -> 期望的 (节点数, 关系数)；关系数含参与者关联与 include
+# 多图工程按所有图合计
 EXPECT = {
     "flowchart-prime": (9, 10),
     "usecase-bank": (10, 9),
@@ -25,6 +26,7 @@ EXPECT = {
     "component-bank": (6, 5),
     "deployment-bank": (4, 3),
     "sequence-withdraw": (3, 11),
+    "4p1-library": (34, 50),
 }
 
 
@@ -44,7 +46,8 @@ def main():
         src = os.path.join(EXAMPLES, name + ".yaml")
         out = os.path.join(tmp, name + ".mdj")
 
-        code, log = run([os.path.join(SCRIPTS, "mdj.py"), "build", src, "-o", out])
+        # --force：回归只写临时文件，不受「StarUML 开着」守卫影响
+        code, log = run([os.path.join(SCRIPTS, "mdj.py"), "build", src, "-o", out, "--force"])
         if code != 0:
             fails.append("%s build 失败：\n%s" % (name, log.strip()[-400:]))
             continue
@@ -55,13 +58,12 @@ def main():
             continue
 
         data = json.load(open(out, encoding="utf-8"))
-        diag = None
+        diags = []
 
         def walk(o):
-            nonlocal diag
             if isinstance(o, dict):
                 if o.get("_type", "").endswith("Diagram"):
-                    diag = o
+                    diags.append(o)
                 for v in o.values():
                     walk(v)
             elif isinstance(o, list):
@@ -69,7 +71,7 @@ def main():
                     walk(i)
 
         walk(data)
-        views = (diag or {}).get("ownedViews", [])
+        views = [v for d in diags for v in d.get("ownedViews", [])]
         NODE_T = ("FCTerminatorView", "FCProcessView", "FCDecisionView", "FCDataView",
                   "UMLActorView", "UMLUseCaseView", "UMLClassView",
                   "UMLComponentView", "UMLNodeView", "UMLSeqLifelineView")

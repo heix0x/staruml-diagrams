@@ -30,6 +30,43 @@ relations:
 
 `text` 是显示的名字。id 可以和 text 不同，长名字用 id 会好写。
 
+### 椭圆下面多两条横线？
+
+因为用例视图的 compartment 可见性是**运行时重算**的：
+
+```js
+this.attributeCompartment.visible = !this.suppressAttributes
+this.operationCompartment.visible = !this.suppressOperations
+```
+
+只把 compartment 写成 `"visible": false` 会被 `update()` 覆盖掉，椭圆的属性栏和操作栏
+就露出来了。正确做法是在视图上写死两个开关：
+
+```json
+"suppressAttributes": true,
+"suppressOperations": true
+```
+
+用例视图还要带 6 个 compartment（多一个 `UMLExtensionPointCompartmentView`），少一个
+StarUML 会自己补一个默认的，同样可能多出线。参与者 / 构件 / 节点的视图同理，`suppressAttributes`
+与 `suppressOperations` 都要写 `true`。
+
+### 坐标：`at` 可选，但用例一多就该手排
+
+不给 `at` 时按 4 列网格自动排。**网格只适合用例少、关系简单的图**；一旦有 include/extend，
+自动排出来的线必然在行间通道里互相重叠，看着像总线。这时给关键用例写 `at: [x, y]` 手排：
+
+```yaml
+  - {id: borrow, kind: usecase, text: 借书, at: [590, 40]}
+```
+
+手排的三条经验：
+
+1. **把 include 的目标放在源的紧邻位置**，上下相邻或同一行左右相邻，线自然就是短的直线。
+2. **参与者与它直接关联的用例之间不要有别的用例挡路**——路由会检测直线是否穿框，
+   穿框才折线；折线多了图就乱。
+3. 两个参与者分列左右时，把两者都关联的用例放在中间列，两边的线都够短。
+
 ### 关系
 
 | kind | 画出来 | 实现 |

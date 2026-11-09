@@ -1,6 +1,6 @@
 # 构件图（kind: component）
 
-**状态：derived** — 结构按 `elements.js` 里的 `UMLComponentView` 定义推导，未在 StarUML 打开验证。首次使用必须开图确认，确认后把 `scripts/component.py` 和本文顶部的 STATUS 改成 `verified`。
+**状态：verified** — 结构经 StarUML 实际打开验证通过（校园图书借阅系统实训6 用例：管理员构件、借阅管理构件等）。
 
 ## 描述文件
 

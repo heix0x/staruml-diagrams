@@ -1,6 +1,6 @@
 # 时序图（kind: sequence）
 
-**状态：derived** — 结构按 `UMLInteraction` / `UMLSeqLifelineView` / `UMLSeqMessageView` 的定义推导，未在 StarUML 打开验证。**六类图里结构最复杂的一类**，首次使用必须开图确认。
+**状态：verified** — 结构经 StarUML 实际打开验证通过（办理读者证 / 借书 两张时序图，含守卫条件分支与生命线自适应间距）。
 
 ## 描述文件
 

@@ -1,4 +1,4 @@
-"""构件图（UMLComponentDiagram）—— STATUS: derived
+"""构件图（UMLComponentDiagram）—— STATUS: verified
 
 依据：按 app.asar 内 extensions/essential/uml/elements.js 的视图类定义推导，
 **未在 StarUML 中实际打开验证**。第一次使用必须让用户开图确认。
@@ -13,7 +13,7 @@ from __future__ import annotations
 from common import (FONT, auto_sides, box, edge_view, hidden_comp, nid, tw,
                     typed_edge, uml_name_comp)
 
-STATUS = "derived"
+STATUS = "verified"
 
 PAD = 40
 COL_GAP = 70
@@ -63,6 +63,9 @@ def build(spec: dict, project_id: str) -> dict:
                          hidden_comp("UMLReceptionCompartmentView", vid, mid[e["id"]], x, y),
                          hidden_comp("UMLTemplateParameterCompartmentView", vid, mid[e["id"]], x, y)],
             "font": FONT, "containerChangeable": True, "containerCollapse": False,
+            # StarUML 每次 update() 用这两个开关重算 compartment 可见性，
+            # 不写死的话构件框里会多出两条空横线
+            "suppressAttributes": True, "suppressOperations": True,
             "left": x, "top": y, "width": w, "height": h,
             "nameCompartment": {"$ref": nc["_id"]},
         })

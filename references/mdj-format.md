@@ -58,7 +58,8 @@ FCFlowView.tail → 视图 id
 
 一个工程里可以有多张图，但**只能有一个** Diagram 带 `defaultDiagram: true`。多了 StarUML 行为不确定。
 
-一个描述文件只生成一张图；要两张写两个描述文件。
+描述文件两种写法：顶层写 `diagram` 出一张图；顶层写 `project` + `views` 出一个工程多张图。
+多图时 `mdj.py build` 会自动只保留第一个 `defaultDiagram`，各图名不能重复。
 
 ## 七、字体
 

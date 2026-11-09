@@ -1,4 +1,4 @@
-"""部署图（UMLDeploymentDiagram）—— STATUS: derived
+"""部署图（UMLDeploymentDiagram）—— STATUS: verified
 
 依据：按 elements.js 的视图类定义推导，**未在 StarUML 中实际打开验证**。
 
@@ -12,10 +12,10 @@
 """
 from __future__ import annotations
 
-from common import (FONT, auto_sides, box, edge_view, hidden_comp, nid, tw,
+from common import (FONT, assoc_like, auto_sides, box, edge_view, hidden_comp, nid, tw,
                     typed_edge, uml_name_comp)
 
-STATUS = "derived"
+STATUS = "verified"
 
 PAD = 40
 
@@ -31,6 +31,7 @@ def _comp_view(dg_id, model_id, x, y, w, h, text):
                       hidden_comp("UMLReceptionCompartmentView", vid, model_id, x, y),
                       hidden_comp("UMLTemplateParameterCompartmentView", vid, model_id, x, y)],
          "font": FONT, "containerChangeable": True,
+         "suppressAttributes": True, "suppressOperations": True,
          "left": x, "top": y, "width": w, "height": h,
          "nameCompartment": {"$ref": nc["_id"]}}
     for i, key in enumerate(("attributeCompartment", "operationCompartment",
@@ -73,6 +74,7 @@ def build(spec: dict, project_id: str) -> dict:
                               hidden_comp("UMLReceptionCompartmentView", vid, mid[e["id"]], x, y),
                               hidden_comp("UMLTemplateParameterCompartmentView", vid, mid[e["id"]], x, y)],
                  "font": FONT, "containerChangeable": True, "containerCollapse": False,
+                 "suppressAttributes": True, "suppressOperations": True,
                  "left": x, "top": y, "width": w, "height": h,
                  "nameCompartment": {"$ref": nc["_id"]}}
             for i, key in enumerate(("attributeCompartment", "operationCompartment",
@@ -95,6 +97,7 @@ def build(spec: dict, project_id: str) -> dict:
             views.append({"_type": "UMLActorView", "_id": vid, "_parent": {"$ref": dg_id},
                           "model": {"$ref": mid[e["id"]]}, "subViews": [nc], "font": FONT,
                           "containerChangeable": True,
+                          "suppressAttributes": True, "suppressOperations": True,
                           "left": x, "top": y, "width": w, "height": h,
                           "nameCompartment": {"$ref": nc["_id"]}})
 
@@ -109,9 +112,13 @@ def build(spec: dict, project_id: str) -> dict:
         if not a or not b:
             raise SystemExit("relation 引用了不存在的元素：%s -> %s" % (r.get("from"), r.get("to")))
         kind = r.get("kind", "dependency")
-        mtype = "UMLCommunicationPath" if kind == "communication" else "UMLDependency"
-        vtype = mtype + "View"
-        m = typed_edge(mtype, mg_id, mid[a["id"]], mid[b["id"]], r.get("label") or "")
+        if kind == "communication":
+            mtype, vtype = "UMLCommunicationPath", "UMLCommunicationPathView"
+            # 通信路径是 UMLAssociation 的子类，只认 end1/end2，写成 source/target 会被丢弃
+            m = assoc_like(mtype, mg_id, mid[a["id"]], mid[b["id"]], r.get("label") or "")
+        else:
+            mtype, vtype = "UMLDependency", "UMLDependencyView"
+            m = typed_edge(mtype, mg_id, mid[a["id"]], mid[b["id"]], r.get("label") or "")
         rel_nodes.append(m)
         va = next(v for v in views if v["_id"] == vids[a["id"]])
         vb = next(v for v in views if v["_id"] == vids[b["id"]])

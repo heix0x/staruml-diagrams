@@ -1,4 +1,4 @@
-"""时序图（UMLSequenceDiagram）—— STATUS: derived
+"""时序图（UMLSequenceDiagram）—— STATUS: verified
 
 依据：按 elements.js 里 UMLInteraction / UMLMessageEndpoint / UMLSeqLifelineView /
 UMLSeqMessageView 的定义推导，**未在 StarUML 中实际打开验证**。结构最复杂的一类，
@@ -18,9 +18,9 @@ UMLSeqMessageView 的定义推导，**未在 StarUML 中实际打开验证**。�
 """
 from __future__ import annotations
 
-from common import FONT, nid
+from common import FONT, nid, tw
 
-STATUS = "derived"
+STATUS = "verified"
 
 LANE_W = 100
 TOP = 40
@@ -61,8 +61,9 @@ def build(spec: dict, project_id: str) -> dict:
     inter_id = nid()
     dg_id = nid()
 
-    # 计算每条生命线的中心 x：等距铺开
-    gap = max(220, int(1400 / max(len(lanes) - 1, 1)))
+    # 生命线间距：按最长消息文字定，太窄会压字，太宽图会散
+    longest = max([tw(m.get("text") or "") for m in msgs] + [tw("消息")])
+    gap = int(min(max(260, longest + 40), 620))
     centers = [120 + i * gap for i in range(len(lanes))]
 
     interaction = {"_type": "UMLInteraction", "_id": inter_id,
@@ -115,9 +116,11 @@ def build(spec: dict, project_id: str) -> dict:
 
         vid = nid()
         lid, sid, prid, aid2 = nid(), nid(), nid(), nid()
+        mtext = m.get("text") or m.get("label") or ""
         lab = {"_type": "EdgeLabelView", "_id": lid, "_parent": {"$ref": vid},
                "model": {"$ref": mid}, "font": FONT, "left": 0, "top": 0, "height": 13,
-               "alpha": ALPHA, "distance": 10, "hostEdge": {"$ref": vid}, "edgePosition": 1}
+               "alpha": ALPHA, "distance": 10, "hostEdge": {"$ref": vid}, "edgePosition": 1,
+               "text": mtext}
         st = {"_type": "EdgeLabelView", "_id": sid, "_parent": {"$ref": vid},
               "model": {"$ref": mid}, "visible": False, "font": FONT, "left": 0, "top": 0,
               "height": 13, "alpha": ALPHA, "distance": 25, "hostEdge": {"$ref": vid},

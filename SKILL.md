@@ -30,7 +30,7 @@ agent_created: true
 ## 二、七条铁律
 
 1. **描述文件里不写坐标。** 坐标由各图模块的布局函数算。唯一例外是类图的 `at: [x, y]`，因为类图自动布局永远不如手调。
-2. **生成前确认 StarUML 已经完全退出。** 它不热重载，开着的时候会把内存里的旧内容写回文件，看起来像「生成失败」。
+2. **生成前 StarUML 必须完全退出。** `mdj.py build` 会检查进程，检测到 StarUML 在跑直接退出（退出码 4）。它在内存里存着打开时的版本、不热重载，你写进去的新文件只要它在界面上保存一次就被盖回去，看起来像「生成了但图没变」。确实要跳过（StarUML 里开的是别的项目）就加 `--force`。
 3. **`STATUS: derived` 的图类型，生成后必须让用户在 StarUML 里打开确认。** 不许当成「已完成」交付。确认通过后把 `references/<图>.md` 和脚本里的 `STATUS` 改成 `verified`。
 4. **示例只给结构参考，不是模板。** 题目出现示例里没有的元素或关系时，必须先查 `references/<图>.md`，再查本机 `app.asar` 里的 `elements.js` 确认这个元素确实存在，然后才写描述。**禁止因为示例没出现过就省略元素，也禁止硬套示例的结构。**
 5. **一个描述文件 = 一张图 = 一个 mdj。** 要多张图就写多个描述文件，不要在同一个文件里塞两张。
@@ -81,6 +81,8 @@ python scripts/mdj.py check  我的图.mdj
 
 ## 四、描述文件语法
 
+单图（一张图一个工程）：
+
 ```yaml
 diagram:
   kind: flowchart          # 必填，决定用哪个模块
@@ -91,7 +93,23 @@ elements: [...]            # 各图自己解释
 relations: [...]           # 可选
 ```
 
-具体字段按图类型不同，见对应 reference。最小可跑的完整例子在 `examples/`。
+多图（一个工程多张图，如 4+1 视图）：
+
+```yaml
+project: 校园图书借阅系统-4+1视图    # 必填，工程名
+
+views:
+  - diagram: {kind: usecase, name: 场景视图-用例图, module: 场景视图}
+    elements: [...]
+    relations: [...]
+  - diagram: {kind: class, name: 逻辑视图-类图, module: 逻辑视图}
+    elements: [...]
+```
+
+多图的硬约束：**图名不能重复**；`defaultDiagram` 由脚本自动只保留第一个，不要手写。
+
+具体字段按图类型不同，见对应 reference。最小可跑的完整例子在 `examples/`，
+六张图合并成工程的完整例子是 `examples/4p1-library.yaml`。
 
 ---
 
@@ -102,9 +120,9 @@ relations: [...]           # 可选
 | flowchart | **verified** | 实训4 的两张流程图已在 StarUML 5.0.2 打开 | `references/flowchart.md` |
 | usecase | **verified** | 结构抄自本机 test3-修正版.mdj（同版本） | `references/usecase.md` |
 | class | **verified** | 结构抄自本机 test1-26-10-11.mdj（同版本） | `references/class.md` |
-| component | derived | 按 `elements.js` 源码推导，未打开验证 | `references/component.md` |
-| deployment | derived | 同上 | `references/deployment.md` |
-| sequence | derived | 同上，生命线与激活条结构最复杂 | `references/sequence.md` |
+| component | verified | StarUML 实际加载验证通过 | `references/component.md` |
+| deployment | verified | 同上（修复通信路径后验证） | `references/deployment.md` |
+| sequence | verified | 同上（两张时序图验证） | `references/sequence.md` |
 
 `derived` 的含义：字段名和嵌套关系来自源码阅读，逻辑上正确，但没有经过 StarUML 实际加载验证。第一次用必须让用户开图确认。
 
@@ -129,7 +147,8 @@ relations: [...]           # 可选
 | 框全叠在左上角 | 视图缺 `left/top`，或用了相对坐标 | 坐标必须是画布绝对坐标 |
 | 文件打不开且无提示 | `$ref` 指向不存在的 id | `check` 会列出未命中引用 |
 | 连线两端连错元素 | `head/tail` 填了模型 id 而不是视图 id | 边视图的 `head/tail` 是视图 `_id` |
-| 改了描述文件但图没变 | StarUML 开着，保存时把旧内容写回 | 完全退出再打开 |
+| 改了描述文件但图没变 | StarUML 开着，保存时把旧内容写回 | 完全退出再打开；`build` 现在会拦住运行中的 StarUML |
+| 图能打开但一条连线都没有 | 关系只生成了模型，没生成连线视图；或文件被 StarUML 旧版本覆盖 | `check` 报「关系没有连线视图」；退出 StarUML 重生成 |
 | 类图属性看不见 | `UMLAttributeCompartmentView` 的 `height` 算小了 | 每个属性 `LINE_H=15`，另加 8px 边距 |
 | 菱形/平行四边形文字换行 | 这两类视图的名称栏只有视图宽度的一半 | 视图宽度给足，`wordWrap: false` |
 
@@ -144,9 +163,9 @@ scripts/dsl.py        描述文件解析与校验
 scripts/flowchart.py  流程图（verified）
 scripts/usecase.py    用例图（verified）
 scripts/classdia.py   类图（verified）
-scripts/component.py  构件图（derived，第二批）
-scripts/deployment.py 部署图（derived，第二批）
-scripts/sequence.py   时序图（derived，第二批）
+scripts/component.py  构件图（verified）
+scripts/deployment.py 部署图（verified）
+scripts/sequence.py   时序图（verified）
 references/           每种图一份结构说明 + 通用格式说明
 examples/             最小可跑的描述文件
 tests/run_checks.py   对 examples 跑 build + check 的回归

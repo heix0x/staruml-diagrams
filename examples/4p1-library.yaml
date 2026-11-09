@@ -1,0 +1,192 @@
+# 校园图书借阅系统 4+1 视图
+# 一份描述文件出一个 mdj 工程，工程里 6 张图（进程视图 2 张时序图）
+project: 校园图书借阅系统-4+1视图
+
+views:
+
+  # ============ 1. 场景视图（用例图） ============
+  # 坐标手排：读者侧一列、共享一列、管理员侧一列，尽量让每条线直连不穿框
+  - diagram:
+      kind: usecase
+      name: 场景视图-用例图
+      module: 场景视图
+    elements:
+      - {id: reader, kind: actor, text: 读者, side: left, at: [40, 120]}
+      - {id: admin, kind: actor, text: 图书管理员, side: right, at: [1240, 120]}
+
+      - {id: chpwd, kind: usecase, text: 修改密码, at: [280, 40]}
+      - {id: query, kind: usecase, text: 图书查询, at: [280, 300]}
+
+      - {id: borrow, kind: usecase, text: 借书, at: [590, 40]}
+      - {id: auth, kind: usecase, text: 身份校验, at: [590, 132]}
+      - {id: giveback, kind: usecase, text: 还书, at: [590, 224]}
+      - {id: apply, kind: usecase, text: 办理读者证, at: [590, 316]}
+      - {id: audit, kind: usecase, text: 审核办证申请, at: [590, 408]}
+
+      - {id: printrc, kind: usecase, text: 打印回执, at: [900, 130]}
+      - {id: fine, kind: usecase, text: 逾期扣费, at: [900, 300]}
+      - {id: calcfine, kind: usecase, text: 计算罚金, at: [900, 400]}
+    relations:
+      - {from: reader, to: chpwd, kind: association}
+      - {from: reader, to: query, kind: association}
+      - {from: reader, to: borrow, kind: association}
+      - {from: reader, to: giveback, kind: association}
+      - {from: reader, to: apply, kind: association}
+
+      - {from: admin, to: borrow, kind: association}
+      - {from: admin, to: giveback, kind: association}
+      - {from: admin, to: apply, kind: association}
+      - {from: admin, to: fine, kind: association}
+
+      - {from: borrow, to: auth, kind: include}
+      - {from: giveback, to: auth, kind: include}
+      - {from: borrow, to: printrc, kind: include}
+      - {from: giveback, to: printrc, kind: include}
+      - {from: fine, to: calcfine, kind: include}
+      - {from: apply, to: audit, kind: include}
+
+      - {from: fine, to: giveback, kind: extend}
+
+  # ============ 2. 逻辑视图（类图） ============
+  - diagram:
+      kind: class
+      name: 逻辑视图-类图
+      module: 逻辑视图
+    elements:
+      - id: reader
+        text: 读者
+        at: [60, 60]
+        attributes: ["-读者编号", "-姓名", "-类型", "-密码", "-状态"]
+        operations: ["+借书()", "+还书()", "+查询图书()", "+修改密码()"]
+      - id: book
+        text: 图书
+        at: [430, 60]
+        attributes: ["-ISBN", "-书名", "-作者", "-库存", "-状态"]
+        operations: ["+查询()", "+更新状态()"]
+      - id: record
+        text: 借阅记录
+        at: [250, 340]
+        attributes: ["-记录号", "-借书日期", "-应还日期", "-归还日期", "-是否逾期"]
+        operations: ["+计算逾期天数()"]
+      - id: receipt
+        text: 回执打印
+        at: [640, 340]
+        attributes: ["-回执号", "-类型"]
+        operations: ["+打印借阅回执()", "+打印归还回执()"]
+      - id: payfine
+        text: 罚金
+        at: [60, 580]
+        attributes: ["-金额", "-天数", "-状态"]
+        operations: ["+计算()", "+收取()"]
+      - id: admin
+        text: 管理员
+        at: [430, 580]
+        attributes: ["-工号", "-姓名", "-密码"]
+        operations: ["+审核办证()", "+办理借还()", "+收取罚金()"]
+    relations:
+      - {from: reader, to: record, kind: association, label: 借阅}
+      - {from: book, to: record, kind: association, label: 被借}
+      - {from: admin, to: record, kind: association, label: 登记}
+      - {from: reader, to: payfine, kind: association, label: 产生, aggregation: 1}
+      - {from: record, to: payfine, kind: association, aggregation: 1}
+      - {from: receipt, to: record, kind: dependency, label: 打印}
+
+  # ============ 3. 开发视图（构件图） ============
+  - diagram:
+      kind: component
+      name: 开发视图-构件图
+      module: 开发视图
+    elements:
+      - {id: main, kind: component, text: 主程序构件, at: [60, 300]}
+      - {id: creader, kind: component, text: 读者构件, at: [400, 60]}
+      - {id: cbook, kind: component, text: 图书构件, at: [400, 210]}
+      - {id: cadmin, kind: component, text: 管理员构件, at: [400, 360]}
+      - {id: cborrow, kind: component, text: 借阅管理构件, at: [720, 210]}
+      - {id: cprint, kind: component, text: 打印构件, at: [1020, 210]}
+    relations:
+      - {from: main, to: creader, label: 接口调用}
+      - {from: main, to: cbook, label: 接口调用}
+      - {from: main, to: cadmin, label: 接口调用}
+      - {from: cadmin, to: cborrow, label: 接口调用}
+      - {from: cborrow, to: creader, label: 接口调用}
+      - {from: cborrow, to: cbook, label: 接口调用}
+      - {from: cborrow, to: cprint, label: 接口调用}
+
+  # ============ 4. 进程视图（时序图 · 办理读者证） ============
+  - diagram:
+      kind: sequence
+      name: 进程视图-办理读者证时序图
+      module: 进程视图
+    elements:
+      - {id: r, kind: lifeline, text: 读者, represent: actor}
+      - {id: a, kind: lifeline, text: 管理员, represent: actor}
+      - {id: s, kind: lifeline, text: 系统}
+    relations:
+      - {from: r, to: a, text: 提交办证申请()}
+      - {from: a, to: s, text: 核验身份信息()}
+      - {from: s, to: a, text: "[信息有效] 生成读者账号()"}
+      - {from: s, to: a, text: "[信息无效] 提示信息有误()"}
+      - {from: a, to: s, text: 设置初始密码()}
+      - {from: s, to: a, text: "[无自定义密码] 分配默认密码()"}
+      - {from: a, to: r, text: 发放借阅卡()}
+
+  # ============ 5. 进程视图（时序图 · 借书） ============
+  - diagram:
+      kind: sequence
+      name: 进程视图-借书时序图
+      module: 进程视图
+    elements:
+      - {id: r, kind: lifeline, text: 读者, represent: actor}
+      - {id: a, kind: lifeline, text: 管理员, represent: actor}
+      - {id: s, kind: lifeline, text: 系统}
+    relations:
+      - {from: r, to: s, text: 查询图书()}
+      - {from: r, to: a, text: 提交借阅申请()}
+      - {from: a, to: s, text: 校验读者账号()}
+      - {from: s, to: a, text: "[账号异常] 拒绝借书()"}
+      - {from: a, to: r, text: "[账号异常] 提示不可借()"}
+      - {from: s, to: a, text: "[账号正常] 校验借阅数量()"}
+      - {from: s, to: a, text: "[超 5 本] 拒绝借书()"}
+      - {from: s, to: a, text: "[校验通过] 生成借阅记录()"}
+      - {from: s, to: a, text: 更新图书状态为已借出()}
+      - {from: s, to: a, text: 打印借阅回执()}
+      - {from: a, to: r, text: 交回执与图书()}
+
+  # ============ 6. 部署视图（部署图） ============
+  - diagram:
+      kind: deployment
+      name: 部署视图-部署图
+      module: 部署视图
+    elements:
+      - id: readerpc
+        kind: node
+        text: 读者查询终端
+        at: [60, 60]
+        w: 230
+        h: 220
+        children: [图书查询构件]
+      - id: adminpc
+        kind: node
+        text: 管理员前台
+        at: [60, 340]
+        w: 230
+        h: 280
+        children: [管理员构件, 借阅管理构件]
+      - id: app
+        kind: node
+        text: 应用服务器节点
+        at: [420, 60]
+        w: 300
+        h: 420
+        children: [主程序构件, 读者构件, 图书构件, 打印构件]
+      - id: db
+        kind: node
+        text: 数据库服务器节点
+        at: [850, 200]
+        w: 230
+        h: 240
+        children: [图书数据库, 借阅数据库]
+    relations:
+      - {from: readerpc, to: app, kind: communication, label: HTTP 查询请求}
+      - {from: adminpc, to: app, kind: communication, label: 局域网 HTTP}
+      - {from: app, to: db, kind: communication, label: JDBC 连接}
