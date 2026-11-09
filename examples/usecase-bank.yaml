@@ -1,0 +1,29 @@
+diagram:
+  kind: usecase
+  name: 银行储蓄系统-用例图
+module: 场景视图
+
+elements:
+  - {id: cust, kind: actor, text: 客户, side: left}
+  - {id: staff, kind: actor, text: 工作人员, side: right}
+
+  - {id: open, kind: usecase, text: 开户}
+  - {id: save, kind: usecase, text: 存款}
+  - {id: draw, kind: usecase, text: 取款}
+  - {id: print, kind: usecase, text: 打印存折}
+  - {id: setpwd, kind: usecase, text: 设置密码}
+  - {id: chpwd, kind: usecase, text: 修改密码}
+  - {id: form, kind: usecase, text: 填写申请表}
+  - {id: verify, kind: usecase, text: 验证并输入系统}
+
+relations:
+  - {from: cust, to: open, kind: association}
+  - {from: cust, to: save, kind: association}
+  - {from: cust, to: draw, kind: association}
+  - {from: staff, to: verify, kind: association}
+
+  - {from: open, to: print, kind: include}
+  - {from: open, to: setpwd, kind: include}
+  - {from: open, to: form, kind: include}
+  - {from: chpwd, to: setpwd, kind: extend}
+  - {from: form, to: verify, kind: include}

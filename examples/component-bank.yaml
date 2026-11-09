@@ -1,0 +1,19 @@
+diagram:
+  kind: component
+  name: 银行储蓄系统-构件图
+module: 开发视图
+
+elements:
+  - {id: main, kind: component, text: 主程序构件, at: [80, 240]}
+  - {id: bank, kind: component, text: 银行构件, at: [430, 60]}
+  - {id: cust, kind: component, text: 客户构件, at: [430, 200]}
+  - {id: staff, kind: component, text: 银行职员构件, at: [430, 340]}
+  - {id: acct, kind: component, text: 账户管理构件, at: [430, 480]}
+  - {id: acc, kind: component, text: 账户构件, at: [760, 60]}
+
+relations:
+  - {from: main, to: bank}
+  - {from: main, to: cust}
+  - {from: main, to: staff}
+  - {from: main, to: acct}
+  - {from: acc, to: bank}

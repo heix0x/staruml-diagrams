@@ -1,0 +1,27 @@
+diagram:
+  kind: flowchart
+  name: 素数判断流程图
+module: 流程图
+
+elements:
+  - {id: start, kind: terminator, text: 开始}
+  - {id: in, kind: data, text: 输入 n}
+  - {id: init, kind: process, text: i ← 2}
+  - {id: deci, kind: decision, text: "i < n ?"}
+  - {id: mod, kind: decision, text: "n mod i = 0 ?"}
+  - {id: no, kind: data, text: 输出「不是素数」}
+  - {id: inc, kind: process, text: i ← i + 1}
+  - {id: yes, kind: data, text: 输出「是素数」}
+  - {id: end, kind: terminator, text: 结束}
+
+relations:
+  - {from: start, to: in}
+  - {from: in, to: init}
+  - {from: init, to: deci}
+  - {from: deci, to: mod, label: 是}
+  - {from: mod, to: no, label: 是}
+  - {from: mod, to: inc, label: 否}
+  - {from: inc, to: deci, back: true}
+  - {from: deci, to: yes, label: 否}
+  - {from: no, to: end}
+  - {from: yes, to: end}

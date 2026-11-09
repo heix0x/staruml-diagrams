@@ -1,0 +1,38 @@
+diagram:
+  kind: class
+  name: 银行储蓄系统-类图
+module: 逻辑视图
+
+elements:
+  - id: 打印
+    attributes: ["-存款清单", "-利息清单"]
+    at: [520, 40]
+  - id: 银行系统
+    at: [200, 190]
+  - id: 存款
+    attributes: ["-存款", "-余额", "-存款类型", "-存款日期"]
+    at: [820, 190]
+  - id: 取款
+    attributes: ["-取款金额", "-余额", "-取款日期", "-利率"]
+    at: [820, 400]
+  - id: 银行账户
+    attributes: ["-姓名", "-性别", "-地址", "-金额", "-密码"]
+    at: [180, 400]
+  - id: 工作人员
+    attributes: ["+姓名", "+性别", "+职位"]
+    at: [520, 620]
+  - id: 储户
+    attributes: ["-姓名", "-地址"]
+    at: [180, 620]
+
+relations:
+  - {from: 银行系统, to: 打印, kind: association, label: 授权}
+  - {from: 银行系统, to: 存款, kind: association, label: 组成, aggregation: 1}
+  - {from: 银行系统, to: 取款, kind: association, label: 组成, aggregation: 1}
+  - {from: 银行系统, to: 银行账户, kind: association, label: 属于}
+  - {from: 银行系统, to: 工作人员, kind: association, label: 授权}
+  - {from: 银行账户, to: 储户, kind: association, label: 拥有}
+  - {from: 储户, to: 工作人员, kind: association, label: 咨询}
+  - {from: 工作人员, to: 取款, kind: association, label: 确认}
+  - {from: 工作人员, to: 存款, kind: association, label: 确认}
+  - {from: 银行账户, to: 工作人员, kind: association, label: 验证}

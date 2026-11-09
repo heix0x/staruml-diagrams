@@ -1,0 +1,22 @@
+diagram:
+  kind: sequence
+  name: 取款时序图
+module: 进程视图
+
+elements:
+  - {id: c, kind: lifeline, text: 客户, represent: actor}
+  - {id: s, kind: lifeline, text: 工作人员, represent: actor}
+  - {id: sys, kind: lifeline, text: 系统}
+
+relations:
+  - {from: c, to: s, text: 输入密码()}
+  - {from: s, to: sys, text: 请求验证账户()}
+  - {from: sys, to: s, text: 账户有效()}
+  - {from: s, to: c, text: 需求事务类型()}
+  - {from: c, to: s, text: 取款()}
+  - {from: s, to: c, text: 要求输入取款金额()}
+  - {from: c, to: s, text: 输入取款金额()}
+  - {from: s, to: sys, text: 请求事务管理()}
+  - {from: sys, to: s, text: 事务成功()}
+  - {from: s, to: c, text: 取现金并打印利息清单()}
+  - {from: s, to: c, text: 结束事务()}
