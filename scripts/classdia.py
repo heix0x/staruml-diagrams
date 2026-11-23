@@ -37,8 +37,11 @@ def _dims(el):
         widest = max(widest, tw(a))
     for o in ops:
         widest = max(widest, tw(o))
+    if el.get("stereotype"):
+        widest = max(widest, tw("\u00ab" + el["stereotype"] + "\u00bb"))
     w = int(max(MIN_W, widest + 24))
-    h = 5 + 25 + (len(attrs) * LINE_H + 8) + (len(ops) * LINE_H + 8)
+    stereo_h = 14 if el.get("stereotype") else 0
+    h = 5 + 25 + stereo_h + (len(attrs) * LINE_H + 8) + (len(ops) * LINE_H + 8)
     return w, h
 
 
@@ -77,10 +80,13 @@ def build(spec: dict, project_id: str) -> dict:
         x, y, w, h = e["_x"], e["_y"], e["_w"], e["_h"]
         attrs = e.get("attributes") or []
         ops = e.get("operations") or []
+        stereo_h = 14 if e.get("stereotype") else 0
+        name_h = 25 + stereo_h
         ah = len(attrs) * LINE_H + 8
         oh = len(ops) * LINE_H + 8
 
-        nc = uml_name_comp(vid, mid, x, y + 5, w, e.get("text") or e["id"])
+        nc = uml_name_comp(vid, mid, x, y + 5, w, e.get("text") or e["id"],
+                           h=name_h, stereotype=e.get("stereotype") or "")
 
         acomp_id = nid()
         asubs = []
@@ -92,12 +98,12 @@ def build(spec: dict, project_id: str) -> dict:
             e.setdefault("_attr_models", []).append(am)
             asubs.append({"_type": "UMLAttributeView", "_id": nid(),
                           "_parent": {"$ref": acomp_id}, "model": {"$ref": am["_id"]},
-                          "font": FONT, "left": round(x + 5, 2), "top": round(y + 30 + i * LINE_H, 2),
+                          "font": FONT, "left": round(x + 5, 2), "top": round(y + 30 + stereo_h + i * LINE_H, 2),
                           "width": round(w - 10, 2), "height": 13, "text": txt,
                           "horizontalAlignment": 0})
         acomp = {"_type": "UMLAttributeCompartmentView", "_id": acomp_id,
                  "_parent": {"$ref": vid}, "model": {"$ref": mid}, "subViews": asubs,
-                 "font": FONT, "left": x, "top": y + 30, "width": w, "height": ah}
+                 "font": FONT, "left": x, "top": y + 30 + stereo_h, "width": w, "height": ah}
 
         ocomp_id = nid()
         osubs = []
@@ -109,12 +115,12 @@ def build(spec: dict, project_id: str) -> dict:
             osubs.append({"_type": "UMLOperationView", "_id": nid(),
                           "_parent": {"$ref": ocomp_id}, "model": {"$ref": om["_id"]},
                           "font": FONT, "left": round(x + 5, 2),
-                          "top": round(y + 30 + ah + i * LINE_H, 2),
+                          "top": round(y + 30 + stereo_h + ah + i * LINE_H, 2),
                           "width": round(w - 10, 2), "height": 13, "text": txt,
                           "horizontalAlignment": 0})
         ocomp = {"_type": "UMLOperationCompartmentView", "_id": ocomp_id,
                  "_parent": {"$ref": vid}, "model": {"$ref": mid}, "subViews": osubs,
-                 "font": FONT, "left": x, "top": y + 30 + ah, "width": w, "height": oh}
+                 "font": FONT, "left": x, "top": y + 30 + stereo_h + ah, "width": w, "height": oh}
 
         views.append({
             "_type": "UMLClassView", "_id": vid, "_parent": {"$ref": dg_id},

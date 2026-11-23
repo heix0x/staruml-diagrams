@@ -32,7 +32,7 @@ relations:
 | `attributes` | 字符串数组。首字符 `+` 公有、`-` 私有（默认） |
 | `operations` | 字符串数组，写法 `+方法名()` |
 | `at: [x, y]` | 可选。不给就自动排两列网格，**有 at 的元素先定位，没 at 的排在它们下方** |
-| `stereotype` | 可选，显示在类名上方 `«xxx»` |
+| `stereotype` | 可选，显示在类名上方 `«xxx»`（名称栏自动加高 14px） |
 
 名称栏用 14px 加粗；属性/操作每行 15px。
 
@@ -96,3 +96,14 @@ h = 5 + 25 + (属性数×15 + 8) + (操作数×15 + 8)
 2. **类名和 id 的关系**：不写 `text` 时 `id` 就是类名。写中文 id 没问题，但 `relations` 里的 `from/to` 也要写同样的中文。
 3. **`UMLAssociationEnd` 是内嵌的**，不是 `$ref`。写成 `{"$ref": ...}` 会导致关联线两端悬空。
 4. **聚合菱形方向**：`aggregation: 1` 是源端（`from` 那一端）出现菱形，`2` 是目标端。写反了菱形会跑到错误的一端。
+
+## 接口与抽象类怎么画
+
+`class` 模块只产出 `UMLClass` + `UMLGeneralization`（实线空心三角），**没有实现关系**
+（`UMLInterfaceRealization`，虚线空心三角）。所以：
+
+- 要用「接口 + 实现」的语义时，画成**抽象类 + 泛化**，在 `stereotype` 里写 `abstract`，
+  并在图注或正文里说明「可设计为接口」。线条样式与语义都对得上。
+- 直接把类标成 `«interface»` 却用泛化线连，视觉上是「继承」，严格讲是错的。
+- 真需要接口虚线，只能手改 mdj 里的 `_type`（`UMLInterface` + `UMLInterfaceRealizationView`），
+  本模块不支持，不要硬套。

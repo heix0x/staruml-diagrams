@@ -54,17 +54,21 @@ def label(pid: str, text: str, x: float, y: float, w: float, h: float = 13,
 
 
 def uml_name_comp(view_id: str, model_id: str, x: float, y: float, w: float,
-                  text: str, h: float = 25, name_font: str = "Arial;13;1") -> dict:
+                  text: str, h: float = 25, name_font: str = "Arial;13;1",
+                  stereotype: str = "") -> dict:
     """UML 类/用例/构件/节点共用的名称栏：一个 compartment 包 4 个 LabelView。
 
     顺序固定为 [stereotypeLabel, nameLabel, namespaceLabel, propertyLabel]，
-    后三个默认隐藏。
+    后三个默认隐藏。给了 stereotype 时第一行显示 «xxx»，名称下移 14px。
     """
     cid = nid()
-    s1 = {"_type": "LabelView", "_id": nid(), "_parent": {"$ref": cid}, "visible": False,
-          "font": FONT, "left": round(x, 2), "top": round(y, 2), "height": 13}
+    stereo_h = 14 if stereotype else 0
+    s1 = {"_type": "LabelView", "_id": nid(), "_parent": {"$ref": cid}, "visible": bool(stereotype),
+          "font": FONT, "left": round(x, 2), "top": round(y, 2), "width": round(w, 2), "height": 13,
+          "text": ("\u00ab" + stereotype + "\u00bb") if stereotype else "",
+          "horizontalAlignment": 2}
     s2 = {"_type": "LabelView", "_id": nid(), "_parent": {"$ref": cid}, "font": name_font,
-          "left": round(x + 5, 2), "top": round(y + 6, 2), "width": round(w - 10, 2),
+          "left": round(x + 5, 2), "top": round(y + 6 + stereo_h, 2), "width": round(w - 10, 2),
           "height": 13, "text": text, "horizontalAlignment": 2}
     s3 = {"_type": "LabelView", "_id": nid(), "_parent": {"$ref": cid}, "visible": False,
           "font": FONT, "left": round(x, 2), "top": round(y, 2), "width": 120, "height": 13}
