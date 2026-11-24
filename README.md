@@ -6,44 +6,49 @@ coordinate entry, no hand-written `$ref` chains.
 把一份描述文件编译成 StarUML 能直接打开的 `.mdj` 工程。人只写「有哪些元素、谁连谁」，
 坐标、id、引用关系由脚本生成。
 
-```bash
-python scripts/mdj.py build examples/flowchart-prime.yaml -o out.mdj
-python scripts/mdj.py check out.mdj
-```
-
 ## 安装
 
-解压 zip，把整个 `staruml-diagrams` 目录放进任意一个 skills 目录，**目录名不要改**：
+需要桌面端助手（能读写本地文件、能跑命令），以及 Python 3.10+。把下面这段整段复制给助手：
 
-| 放在哪 | 路径 | 效果 |
-|---|---|---|
-| 全机公共库 | `~/.agents/skills/` | 本机所有 agent 共用 |
-| WorkBuddy | `~/.workbuddy/skills/` | 只在 WorkBuddy 里可用 |
-| DSH 等其他客户端 | 各自的 `skills/` | 同理 |
-
-```bash
-# Windows 示例
-Expand-Archive staruml-diagrams-1.0.0.zip -DestinationPath "$env:USERPROFILE\.agents\skills"
+```
+帮我装一个技能：https://github.com/heix0x/staruml-diagrams
+1. 先确认你自己的 skills 目录（WorkBuddy 是 ~/.workbuddy/skills，Windows 即
+   %USERPROFILE%\.workbuddy\skills\；Claude Code 是 ~/.claude/skills；其它助手你自己查），
+   装到那里，目录名保持 staruml-diagrams。
+2. 有 git 就 git clone；没有 git 就去 https://github.com/heix0x/staruml-diagrams/releases/latest
+   下最新的 staruml-diagrams-*.zip 解压进去。
+3. 只有一条依赖：python -m pip install pyyaml。装不上就算了，描述文件写成 .json 一样能用。
+4. 进目录跑 python tests/run_checks.py 自检，退出码 0 就是装好了；
+   报错把原始输出贴给我，不要猜着改，也不要跳过失败项。
+5. 装完读一遍 SKILL.md，然后告诉我三件事：装到哪个路径、自检通过没有、我下一步做什么。
 ```
 
-依赖只有一条，Python 3.10+：
+不想让助手装，就手动：解压 zip，把整个 `staruml-diagrams` 目录放进任意一个 skills 目录，**目录名不要改**：
 
-```bash
-python -m pip install pyyaml
+| 放在哪 | 路径 |
+|---|---|
+| 全机公共库 | `~/.agents/skills/` |
+| WorkBuddy | `~/.workbuddy/skills/` |
+| DSH 等其他客户端 | 各自的 `skills/` |
+
+```powershell
+# Windows 示例：装最近下载的那个包，文件名带版本号，不要抄死
+Expand-Archive (Get-ChildItem "$env:USERPROFILE\Downloads\staruml-diagrams-*.zip" |
+  Sort-Object LastWriteTime | Select-Object -Last 1) -DestinationPath "$env:USERPROFILE\.agents\skills"
 ```
 
-不装 PyYAML 也能用 —— 把描述文件写成 `.json` 即可。
-
-装完确认一遍：
+装完确认一遍，这也是第一次跑通的最小例子：
 
 ```bash
 python scripts/mdj.py build examples/flowchart-prime.yaml -o out.mdj
 python scripts/mdj.py check out.mdj
 ```
 
-两条都通过，说明装好了。
+两条都不报错、`out.mdj` 有生成，就是装好了。自检用的是 YAML 示例，需要 `pyyaml`；不装就把描述文件写成 `.json`。
 
-## 你说 → 它做
+## 用法：你说 → 它做
+
+装好之后直接说要什么图，助手会自己挑图类型、写描述文件、build、check：
 
 | 你说 | 它做 |
 |---|---|
