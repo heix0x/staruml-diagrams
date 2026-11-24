@@ -17,7 +17,7 @@ coordinate entry, no hand-written `$ref` chains.
 下最新的 staruml-diagrams-*.zip 解压进去。
 只有一条依赖：python -m pip install pyyaml，装不上就算了（描述文件写成 .json 一样能用）。
 装完跑 python tests/run_checks.py 自检，报错你自己处理，不用问我。
-装完告诉我：这个技能叫什么名字、我在对话里怎么调它。
+最后告诉我：这个技能叫什么名字、我在对话里怎么调它。
 ```
 
 装完怎么确认：在对话框点 **+**（有的助手是输入 **/**），列表里能看到 `staruml-diagrams` 就是好了。
