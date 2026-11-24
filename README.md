@@ -12,15 +12,19 @@ coordinate entry, no hand-written `$ref` chains.
 
 ```
 帮我装一个技能：https://github.com/heix0x/staruml-diagrams
-1. 先确认你自己的 skills 目录（WorkBuddy 是 ~/.workbuddy/skills，Windows 即
-   %USERPROFILE%\.workbuddy\skills\；Claude Code 是 ~/.claude/skills；其它助手你自己查），
-   装到那里，目录名保持 staruml-diagrams。
-2. 有 git 就 git clone；没有 git 就去 https://github.com/heix0x/staruml-diagrams/releases/latest
-   下最新的 staruml-diagrams-*.zip 解压进去。
-3. 只有一条依赖：python -m pip install pyyaml。装不上就算了，描述文件写成 .json 一样能用。
-4. 进目录跑 python tests/run_checks.py 自检，退出码 0 就是装好了；
-   报错把原始输出贴给我，不要猜着改，也不要跳过失败项。
-5. 装完读一遍 SKILL.md，然后告诉我三件事：装到哪个路径、自检通过没有、我下一步做什么。
+装到你自己的 skills 目录（WorkBuddy 是 ~/.workbuddy/skills），目录名保持 staruml-diagrams。
+有 git 就 clone；没有就去 https://github.com/heix0x/staruml-diagrams/releases/latest
+下最新的 staruml-diagrams-*.zip 解压进去。
+只有一条依赖：python -m pip install pyyaml，装不上就算了（描述文件写成 .json 一样能用）。
+装完跑 python tests/run_checks.py 自检，报错你自己处理，不用问我。
+装完告诉我：这个技能叫什么名字、我在对话里怎么调它。
+```
+
+装完怎么确认：在对话框点 **+**（有的助手是输入 **/**），列表里能看到 `staruml-diagrams` 就是好了。
+看不到就发这句：
+
+```
+我在技能列表里看不到 staruml-diagrams，你查一下为什么没被识别，修好后告诉我怎么调它。
 ```
 
 不想让助手装，就手动：解压 zip，把整个 `staruml-diagrams` 目录放进任意一个 skills 目录，**目录名不要改**：
